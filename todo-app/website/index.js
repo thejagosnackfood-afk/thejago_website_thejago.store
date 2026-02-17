@@ -12,6 +12,8 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
 
+const PORT = Number(process.env.PORT) || 3000;
+
 const defaultStaticDir = path.resolve(__dirname, '../frontend/dist');
 const staticDir = process.env.STATIC_DIR ? path.resolve(process.env.STATIC_DIR) : defaultStaticDir;
 const staticIndex = path.join(staticDir, 'index.html');
@@ -73,17 +75,16 @@ app.use('/api/payments', require('./src/routes/paymentRoutes'));
 app.use('/api/admin', require('./src/routes/adminRoutes'));
 
 // Optional: serve a built frontend (Vite/React) if present.
-if (fs.existsSync(staticDir)) {
+if (fs.existsSync(staticIndex)) {
   app.use(express.static(staticDir));
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(staticDir, 'index.html'));
+  // Express v5 + path-to-regexp no longer accepts '*' routes.
+  app.get(/^\/(?!api(?:\/|$)).*/, (req, res) => {
+    res.sendFile(staticIndex);
   });
 }
 
 app.use(notFound);
 app.use(errorHandler);
-
-const PORT = Number(process.env.PORT) || 3000;
 connectDb()
   .then(() => {
     app.listen(PORT, () => {
