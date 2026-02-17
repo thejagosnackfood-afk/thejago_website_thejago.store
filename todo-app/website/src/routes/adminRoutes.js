@@ -4,7 +4,9 @@ const { Category } = require('../models/Category');
 const { Product } = require('../models/Product');
 const { Order } = require('../models/Order');
 const { Review } = require('../models/Review');
+const { KnowledgeDoc } = require('../models/KnowledgeDoc');
 const { requireAdmin } = require('../middleware/admin');
+const { embedText } = require('../services/embeddings');
 
 const router = express.Router();
 
@@ -315,6 +317,80 @@ router.put('/orders/:id/status', requireAdmin, async (req, res, next) => {
     const order = await Order.findByIdAndUpdate(req.params.id, { status: String(status) }, { new: true });
     if (!order) return res.status(404).json({ error: 'order_not_found' });
     res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+});
+
+function ensureSlug(input) {
+  return slugify(input || '');
+}
+
+// Knowledge base docs for IVA (ToolJet can manage these via HTTP resource)
+router.get('/kb/docs', requireAdmin, async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 50), 200);
+    const skip = Math.max(0, Number(req.query.skip || 0));
+    const docs = await KnowledgeDoc.find({}).sort({ updatedAt: -1 }).skip(skip).limit(limit).lean();
+    const total = await KnowledgeDoc.countDocuments({});
+    res.json({ docs, total });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/kb/docs', requireAdmin, async (req, res, next) => {
+  try {
+    const { title, slug, content, tags, isActive } = req.body || {};
+    if (!title || !content) return res.status(400).json({ error: 'missing_fields' });
+    const finalSlug = slug ? ensureSlug(slug) : ensureSlug(title);
+
+    const doc = await KnowledgeDoc.create({
+      title: String(title).trim(),
+      slug: finalSlug,
+      content: String(content),
+      tags: Array.isArray(tags) ? tags.map(String) : [],
+      isActive: isActive !== undefined ? Boolean(isActive) : true,
+    });
+
+    res.json({ doc });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/kb/docs/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { title, slug, content, tags, isActive } = req.body || {};
+    const update = {};
+    if (title !== undefined) update.title = String(title).trim();
+    if (slug !== undefined) update.slug = ensureSlug(slug);
+    if (content !== undefined) update.content = String(content);
+    if (tags !== undefined) update.tags = Array.isArray(tags) ? tags.map(String) : [];
+    if (isActive !== undefined) update.isActive = Boolean(isActive);
+
+    const doc = await KnowledgeDoc.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!doc) return res.status(404).json({ error: 'doc_not_found' });
+    res.json({ doc });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/kb/reindex', requireAdmin, async (req, res, next) => {
+  try {
+    const docs = await KnowledgeDoc.find({ isActive: true }).select('_id content').lean();
+    let updated = 0;
+    for (const d of docs) {
+      const emb = await embedText(d.content);
+      if (!emb) continue;
+      await KnowledgeDoc.updateOne(
+        { _id: d._id },
+        { embeddingModel: emb.model, embedding: emb.vector }
+      );
+      updated++;
+    }
+    res.json({ ok: true, updated });
   } catch (err) {
     next(err);
   }

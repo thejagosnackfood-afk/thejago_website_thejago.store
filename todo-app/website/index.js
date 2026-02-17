@@ -23,6 +23,7 @@ app.use('/api/cart', require('./src/routes/cartRoutes'));
 app.use('/api/orders', require('./src/routes/orderRoutes'));
 app.use('/api/reviews', require('./src/routes/reviewRoutes'));
 app.use('/api/chat', require('./src/routes/chatRoutes'));
+app.use('/api/assistant', require('./src/routes/assistantRoutes'));
 app.use('/api/payments', require('./src/routes/paymentRoutes'));
 app.use('/api/admin', require('./src/routes/adminRoutes'));
 
