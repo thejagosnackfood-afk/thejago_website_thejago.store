@@ -1,0 +1,16 @@
+const mongoose = require('mongoose');
+
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    phoneE164: { type: String, required: true, unique: true, index: true, trim: true },
+    email: { type: String, trim: true },
+    passwordHash: { type: String, required: true },
+    whatsappVerified: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
+
+const User = mongoose.model('User', userSchema);
+module.exports = { User };
+
