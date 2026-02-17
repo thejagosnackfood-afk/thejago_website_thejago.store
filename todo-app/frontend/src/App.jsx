@@ -10,6 +10,7 @@ import ChatWidget from './components/ChatWidget.jsx';
 import SearchBar from './components/SearchBar.jsx';
 import BannerStrip from './components/BannerStrip.jsx';
 import SectionRow from './components/SectionRow.jsx';
+import CategoryTiles from './components/CategoryTiles.jsx';
 
 function Header() {
   const { user, setAuthModalOpen, logout } = useStore();
@@ -55,6 +56,7 @@ function Home() {
       <div className="layout">
         <CategoryRail />
         <section className="main">
+          <CategoryTiles />
           <SectionRow title="Rekomendasi" subtitle="Sering dibeli pelanggan." products={recommended} />
           <SectionRow title="Diskon" subtitle="Harga lebih hemat hari ini." products={discounts} />
           <SectionRow title="Flash Sale" subtitle="Waktu terbatas." products={flashSales} tone="hot" />
