@@ -14,6 +14,7 @@ Env:
 - Jika ingin fitur CS chat: set `OPENAI_API_KEY` di `todo-app/website/.env` (jangan taruh API key di README)
 - Jika ingin Midtrans: `MIDTRANS_SERVER_KEY`, `MIDTRANS_CLIENT_KEY`
 - Jika ingin seed: `ADMIN_SEED_TOKEN`
+- Untuk admin panel (ToolJet via API): set `ADMIN_API_TOKEN` (header `x-admin-token`)
 - WhatsApp OTP:
   - Dev: `WHATSAPP_PROVIDER=mock` + `WHATSAPP_MOCK=true` (OTP akan dikembalikan sebagai `mockCode`)
   - Production: perlu integrasi provider WhatsApp sungguhan di `todo-app/website/src/services/whatsapp.js`
@@ -36,19 +37,26 @@ Endpoint utama:
 - `POST /api/orders` (butuh `whatsappVerified=true`)
 - `POST /api/payments/midtrans/snap-token`
 - `POST /api/payments/midtrans/notification` (callback Midtrans)
-- `POST /api/admin/seed` (header `x-admin-seed-token`)
-- `POST /api/admin/google-reviews` (header `x-admin-seed-token`)
+- `POST /api/admin/seed` (header `x-admin-token`)
+- `POST /api/admin/google-reviews` (header `x-admin-token`)
+
+Admin CRUD (untuk ToolJet):
+- `GET /api/admin/categories` (header `x-admin-token`)
+- `POST /api/admin/categories` (header `x-admin-token`)
+- `GET /api/admin/products` (header `x-admin-token`)
+- `POST /api/admin/products` (header `x-admin-token`)
+- `GET /api/admin/orders` (header `x-admin-token`)
 
 Seed data contoh:
 ```bash
-curl -X POST http://localhost:3000/api/admin/seed -H "x-admin-seed-token: <ADMIN_SEED_TOKEN>"
+curl -X POST http://localhost:3000/api/admin/seed -H "x-admin-token: <ADMIN_API_TOKEN>"
 ```
 
 Isi ulasan Google Maps (via admin endpoint):
 ```bash
 curl -X POST http://localhost:3000/api/admin/google-reviews \
   -H "Content-Type: application/json" \
-  -H "x-admin-seed-token: <ADMIN_SEED_TOKEN>" \
+  -H "x-admin-token: <ADMIN_API_TOKEN>" \
   -d '{"reviews":[{"authorName":"Google User","rating":5,"text":"Enak dan cepat!"}]}'
 ```
 

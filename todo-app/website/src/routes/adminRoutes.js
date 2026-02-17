@@ -2,7 +2,9 @@ const express = require('express');
 
 const { Category } = require('../models/Category');
 const { Product } = require('../models/Product');
+const { Order } = require('../models/Order');
 const { Review } = require('../models/Review');
+const { requireAdmin } = require('../middleware/admin');
 
 const router = express.Router();
 
@@ -14,13 +16,8 @@ function slugify(name) {
     .replace(/(^-|-$)/g, '');
 }
 
-router.post('/seed', async (req, res, next) => {
+router.post('/seed', requireAdmin, async (req, res, next) => {
   try {
-    const token = req.headers['x-admin-seed-token'];
-    if (!process.env.ADMIN_SEED_TOKEN || token !== process.env.ADMIN_SEED_TOKEN) {
-      return res.status(401).json({ error: 'unauthorized' });
-    }
-
     const categoryNames = [
       'Baso',
       'Sosis',
@@ -91,13 +88,8 @@ router.post('/seed', async (req, res, next) => {
   }
 });
 
-router.post('/google-reviews', async (req, res, next) => {
+router.post('/google-reviews', requireAdmin, async (req, res, next) => {
   try {
-    const token = req.headers['x-admin-seed-token'];
-    if (!process.env.ADMIN_SEED_TOKEN || token !== process.env.ADMIN_SEED_TOKEN) {
-      return res.status(401).json({ error: 'unauthorized' });
-    }
-
     const { reviews } = req.body || {};
     if (!Array.isArray(reviews)) return res.status(400).json({ error: 'invalid_reviews' });
 
@@ -115,6 +107,214 @@ router.post('/google-reviews', async (req, res, next) => {
 
     if (toInsert.length) await Review.insertMany(toInsert);
     res.json({ ok: true, inserted: toInsert.length });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Admin CRUD (for ToolJet UI)
+router.get('/categories', requireAdmin, async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 100), 500);
+    const skip = Math.max(0, Number(req.query.skip || 0));
+    const categories = await Category.find({}).sort({ sortOrder: 1, name: 1 }).skip(skip).limit(limit).lean();
+    const total = await Category.countDocuments({});
+    res.json({ categories, total });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/categories', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, slug, sortOrder } = req.body || {};
+    if (!name) return res.status(400).json({ error: 'missing_name' });
+    const finalSlug = slug ? slugify(slug) : slugify(name);
+    const cat = await Category.create({
+      name: String(name).trim(),
+      slug: finalSlug,
+      sortOrder: Number(sortOrder || 0),
+    });
+    res.json({ category: cat });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/categories/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const { name, slug, sortOrder } = req.body || {};
+    const update = {};
+    if (name) update.name = String(name).trim();
+    if (slug) update.slug = slugify(slug);
+    if (sortOrder !== undefined) update.sortOrder = Number(sortOrder);
+    const cat = await Category.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!cat) return res.status(404).json({ error: 'category_not_found' });
+    res.json({ category: cat });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete('/categories/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const used = await Product.exists({ category: req.params.id });
+    if (used) return res.status(409).json({ error: 'category_in_use' });
+    const r = await Category.deleteOne({ _id: req.params.id });
+    if (!r.deletedCount) return res.status(404).json({ error: 'category_not_found' });
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/products', requireAdmin, async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 50), 200);
+    const skip = Math.max(0, Number(req.query.skip || 0));
+    const { q, categorySlug, isActive } = req.query || {};
+
+    const filter = {};
+    if (q) filter.name = new RegExp(String(q), 'i');
+    if (isActive === 'true') filter.isActive = true;
+    if (isActive === 'false') filter.isActive = false;
+    if (categorySlug) {
+      const cat = await Category.findOne({ slug: String(categorySlug) }).select('_id').lean();
+      if (cat) filter.category = cat._id;
+    }
+
+    const products = await Product.find(filter)
+      .populate('category', 'name slug')
+      .sort({ updatedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    const total = await Product.countDocuments(filter);
+    res.json({ products, total });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.post('/products', requireAdmin, async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    if (!body.name) return res.status(400).json({ error: 'missing_name' });
+    if (body.priceIdr === undefined) return res.status(400).json({ error: 'missing_price' });
+
+    const finalSlug = body.slug ? slugify(body.slug) : slugify(body.name);
+    const category = body.categorySlug
+      ? await Category.findOne({ slug: String(body.categorySlug) }).select('_id').lean()
+      : null;
+
+    const product = await Product.create({
+      name: String(body.name).trim(),
+      slug: finalSlug,
+      category: category?._id,
+      priceIdr: Number(body.priceIdr),
+      imageUrl: body.imageUrl ? String(body.imageUrl).trim() : '',
+      isRecommended: Boolean(body.isRecommended),
+      discountPercent: Number(body.discountPercent || 0),
+      flashSale: {
+        isActive: Boolean(body.flashSale?.isActive),
+        priceIdr: body.flashSale?.priceIdr !== undefined ? Number(body.flashSale.priceIdr) : undefined,
+        endsAt: body.flashSale?.endsAt ? new Date(body.flashSale.endsAt) : undefined,
+      },
+      isActive: body.isActive !== undefined ? Boolean(body.isActive) : true,
+    });
+
+    res.json({ product });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/products/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const body = req.body || {};
+    const update = {};
+    if (body.name) update.name = String(body.name).trim();
+    if (body.slug) update.slug = slugify(body.slug);
+    if (body.priceIdr !== undefined) update.priceIdr = Number(body.priceIdr);
+    if (body.imageUrl !== undefined) update.imageUrl = String(body.imageUrl || '').trim();
+    if (body.isRecommended !== undefined) update.isRecommended = Boolean(body.isRecommended);
+    if (body.discountPercent !== undefined) update.discountPercent = Number(body.discountPercent || 0);
+    if (body.isActive !== undefined) update.isActive = Boolean(body.isActive);
+
+    if (body.categorySlug !== undefined) {
+      if (!body.categorySlug) update.category = null;
+      else {
+        const cat = await Category.findOne({ slug: String(body.categorySlug) }).select('_id').lean();
+        update.category = cat?._id || null;
+      }
+    }
+
+    if (body.flashSale !== undefined) {
+      update.flashSale = {
+        isActive: Boolean(body.flashSale?.isActive),
+        priceIdr: body.flashSale?.priceIdr !== undefined ? Number(body.flashSale.priceIdr) : undefined,
+        endsAt: body.flashSale?.endsAt ? new Date(body.flashSale.endsAt) : undefined,
+      };
+    }
+
+    const product = await Product.findByIdAndUpdate(req.params.id, update, { new: true });
+    if (!product) return res.status(404).json({ error: 'product_not_found' });
+    res.json({ product });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Soft delete: keep record but disable in storefront
+router.delete('/products/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const product = await Product.findByIdAndUpdate(req.params.id, { isActive: false }, { new: true });
+    if (!product) return res.status(404).json({ error: 'product_not_found' });
+    res.json({ product });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/orders', requireAdmin, async (req, res, next) => {
+  try {
+    const limit = Math.min(Number(req.query.limit || 50), 200);
+    const skip = Math.max(0, Number(req.query.skip || 0));
+    const { status } = req.query || {};
+    const filter = {};
+    if (status) filter.status = String(status);
+
+    const orders = await Order.find(filter)
+      .populate('user', 'name phoneE164')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
+    const total = await Order.countDocuments(filter);
+    res.json({ orders, total });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.get('/orders/:id', requireAdmin, async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id).populate('user', 'name phoneE164').lean();
+    if (!order) return res.status(404).json({ error: 'order_not_found' });
+    res.json({ order });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.put('/orders/:id/status', requireAdmin, async (req, res, next) => {
+  try {
+    const { status } = req.body || {};
+    const allowed = new Set(['pending', 'paid', 'failed', 'canceled']);
+    if (!allowed.has(String(status))) return res.status(400).json({ error: 'invalid_status' });
+    const order = await Order.findByIdAndUpdate(req.params.id, { status: String(status) }, { new: true });
+    if (!order) return res.status(404).json({ error: 'order_not_found' });
+    res.json({ order });
   } catch (err) {
     next(err);
   }
