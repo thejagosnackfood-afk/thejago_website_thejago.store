@@ -7,6 +7,9 @@ import Reviews from './components/Reviews.jsx';
 import AuthModal from './components/AuthModal.jsx';
 import CartDock from './components/CartDock.jsx';
 import ChatWidget from './components/ChatWidget.jsx';
+import SearchBar from './components/SearchBar.jsx';
+import BannerStrip from './components/BannerStrip.jsx';
+import SectionRow from './components/SectionRow.jsx';
 
 function Header() {
   const { user, setAuthModalOpen, logout } = useStore();
@@ -19,7 +22,9 @@ function Header() {
           <div className="brand__sub">Snack & Frozen Food</div>
         </div>
       </div>
-      <div className="topbar__spacer" />
+      <div className="topbar__search">
+        <SearchBar />
+      </div>
       <div className="topbar__actions">
         {user ? (
           <>
@@ -39,20 +44,26 @@ function Header() {
 }
 
 function Home() {
-  const { products, activeCategorySlug, categories, mostViewed } = useStore();
+  const { products, activeCategorySlug, categories, mostViewed, recommended, discounts, flashSales, searchQuery } =
+    useStore();
   const activeName = categories.find((c) => c.slug === activeCategorySlug)?.name || 'Produk';
 
   return (
     <main className="shell">
-      <div className="hero reveal" style={{ '--delay': '40ms' }}>
-        <div className="hero__kicker">Grocery TK</div>
-        <div className="hero__title">Belanja frozen food, bumbu, dan kebutuhan harian.</div>
-        <div className="hero__sub">UI ringan, modern, dan fokus ke kategori favorit pelanggan.</div>
-      </div>
+      <BannerStrip />
 
       <div className="layout">
+        <CategoryRail />
         <section className="main">
-          <ProductGrid title={activeName} subtitle="Klik kategori di sisi kanan untuk ganti daftar." products={products} />
+          <SectionRow title="Rekomendasi" subtitle="Sering dibeli pelanggan." products={recommended} />
+          <SectionRow title="Diskon" subtitle="Harga lebih hemat hari ini." products={discounts} />
+          <SectionRow title="Flash Sale" subtitle="Waktu terbatas." products={flashSales} tone="hot" />
+
+          <ProductGrid
+            title={searchQuery ? `Hasil: "${searchQuery}"` : activeName}
+            subtitle={searchQuery ? 'Hasil pencarian produk.' : 'Pilih kategori di sisi kiri untuk ganti daftar.'}
+            products={products}
+          />
 
           <section className="panel reveal" style={{ '--delay': '150ms' }}>
             <div className="panel__head">
@@ -72,7 +83,6 @@ function Home() {
         </section>
 
         <Sidebar />
-        <CategoryRail />
       </div>
 
       <CartDock />

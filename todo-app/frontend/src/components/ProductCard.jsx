@@ -41,8 +41,8 @@ export default function ProductCard({ product, compact = false }) {
           <div className="productCard__price">{formatIdr(price)}</div>
           {hasDiscount ? <div className="productCard__old">{formatIdr(product.priceIdr)}</div> : null}
         </div>
-        <button className="btn btn--mini" onClick={(e) => (e.stopPropagation(), addToCart(product, 1))}>
-          + Keranjang
+        <button className="btn btn--mini btn--add" onClick={(e) => (e.stopPropagation(), addToCart(product, 1))}>
+          ADD
         </button>
       </div>
     </article>

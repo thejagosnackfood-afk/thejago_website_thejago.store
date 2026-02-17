@@ -24,6 +24,7 @@ export function StoreProvider({ children }) {
   const [categories, setCategories] = useState([]);
   const [activeCategorySlug, setActiveCategorySlug] = useState('');
   const [products, setProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const [recommended, setRecommended] = useState([]);
   const [discounts, setDiscounts] = useState([]);
@@ -72,12 +73,15 @@ export function StoreProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    if (!activeCategorySlug) return;
+    if (!activeCategorySlug && !searchQuery) return;
     (async () => {
-      const data = await apiFetch(`/api/products?category=${encodeURIComponent(activeCategorySlug)}`);
+      const qs = new URLSearchParams();
+      if (activeCategorySlug && !searchQuery) qs.set('category', activeCategorySlug);
+      if (searchQuery) qs.set('q', searchQuery);
+      const data = await apiFetch(`/api/products?${qs.toString()}`);
       setProducts(data.products || []);
     })();
-  }, [activeCategorySlug]);
+  }, [activeCategorySlug, searchQuery]);
 
   useEffect(() => {
     (async () => {
@@ -145,6 +149,8 @@ export function StoreProvider({ children }) {
       activeCategorySlug,
       setActiveCategorySlug,
       products,
+      searchQuery,
+      setSearchQuery,
       recommended,
       discounts,
       flashSales,
@@ -161,6 +167,7 @@ export function StoreProvider({ children }) {
       categories,
       activeCategorySlug,
       products,
+      searchQuery,
       recommended,
       discounts,
       flashSales,
@@ -179,4 +186,3 @@ export function useStore() {
   if (!ctx) throw new Error('useStore must be used within StoreProvider');
   return ctx;
 }
-

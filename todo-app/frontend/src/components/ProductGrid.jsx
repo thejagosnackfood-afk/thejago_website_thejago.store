@@ -11,11 +11,14 @@ export default function ProductGrid({ title, products, subtitle }) {
         </div>
       </div>
       <div className="grid">
-        {products.map((p) => (
-          <ProductCard key={p._id || p.slug} product={p} />
-        ))}
+        {products.length ? (
+          products.map((p) => <ProductCard key={p._id || p.slug} product={p} />)
+        ) : (
+          <div className="muted" style={{ padding: '10px 2px' }}>
+            Belum ada produk. Pastikan backend nyala dan sudah seed data.
+          </div>
+        )}
       </div>
     </section>
   );
 }
-
