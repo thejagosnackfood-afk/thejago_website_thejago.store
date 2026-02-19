@@ -11,6 +11,8 @@ import SearchBar from './components/SearchBar.jsx';
 import BannerStrip from './components/BannerStrip.jsx';
 import SectionRow from './components/SectionRow.jsx';
 import CategoryTiles from './components/CategoryTiles.jsx';
+import Hero from './components/Hero.jsx';
+import Features from './components/Features.jsx';
 
 function Header() {
   const { user, setAuthModalOpen, logout } = useStore();
@@ -51,7 +53,9 @@ function Home() {
 
   return (
     <main className="shell">
+      <Hero />
       <BannerStrip />
+      <Features />
 
       <div className="layout">
         <CategoryRail />

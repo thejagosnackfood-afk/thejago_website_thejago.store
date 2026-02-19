@@ -1,0 +1,39 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "awesome-agent-skills",
+			"path": "todo-app/awesome-agent-skills"
+		}
+	],
+	"settings": {
+		"cSpell.words": [
+			"Supabase"
+		],
+		"workbench.editor.enablePreviewFromCodeNavigation": true,
+		"workbench.editor.enablePreviewFromQuickOpen": true,
+		"workbench.editor.alwaysShowEditorActions": true,
+		"workbench.editor.autoLockGroups": {
+			"default": true,
+			"workbench.editor.chatSession": true,
+			"sqldeveloper.dataImport.editor": true,
+			"workbench.editorinputs.searchEditorInput": true,
+			"agentSessionsWelcomePage": true,
+			"workbench.editorinputs.browser": true,
+			"notebookOutputEditor": true,
+			"jupyter-notebook": true,
+			"sql-book": true,
+			"sql-query-book": true,
+			"copilot-chat-replay": true,
+			"oracle-sql-notebook": true,
+			"repl": true,
+			"workbench.editors.gettingStartedInput": true,
+			"imagePreview.previewEditor": true,
+			"vscode.audioPreview": true
+		},
+		"envWatcher.enabled": true,
+		"powershell.cwd": "website thejago.store"
+	}
+}
