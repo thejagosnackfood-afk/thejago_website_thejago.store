@@ -5,15 +5,22 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 
-const { connectDb } = require('./src/db');
+const { checkFirestoreConnection } = require('./src/config/firestore');
 const { notFound, errorHandler } = require('./src/middleware/errors');
 
 const app = express();
+const PORT = Number(process.env.PORT) || 8080;
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
-
-const PORT = Number(process.env.PORT) || 3000;
+// Handle JSON syntax errors
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    console.error('Bad JSON:', err.message);
+    return res.status(400).json({ error: 'invalid_json', message: err.message });
+  }
+  next(err);
+});
 
 const defaultStaticDir = path.resolve(__dirname, '../frontend/dist');
 const staticDir = process.env.STATIC_DIR ? path.resolve(process.env.STATIC_DIR) : defaultStaticDir;
@@ -87,13 +94,24 @@ if (fs.existsSync(staticIndex)) {
 
 app.use(notFound);
 app.use(errorHandler);
-connectDb()
-  .then(() => {
-    app.listen(PORT, () => {
-      console.log(`Server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('Failed to start server:', err);
-    process.exitCode = 1;
+
+// Connect to databases
+console.log('Attempting to connect to databases...');
+
+// We only use Firestore now
+checkFirestoreConnection().then(() => {
+  console.log('Firestore check complete. Starting server...');
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT}`);
   });
+}).catch((err) => {
+  console.error('Firestore connection failed:', err);
+  // Still start server
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://0.0.0.0:${PORT} (Database connection failed)`);
+  });
+});
+
+// app.listen(PORT, '0.0.0.0', () => {
+//   console.log(`Server running on http://0.0.0.0:${PORT}`);
+// });

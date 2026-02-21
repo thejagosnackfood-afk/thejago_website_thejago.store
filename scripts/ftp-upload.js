@@ -8,7 +8,7 @@ const EasyFtp = require('easy-ftp');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '.env') });
 
-const ftp = new EasyFtp();
+const sftp = new EasyFtp();
 
 const config = {
   host: process.env.FTP_HOST,

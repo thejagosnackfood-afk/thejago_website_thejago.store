@@ -1,0 +1,35 @@
+{
+  "name": "todo-app",
+  "version": "1.0.0",
+  "description": "E-commerce website for The Jago Snack & Frozen Food",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node --watch index.js",
+    "build": "npm run build:frontend",
+    "build:frontend": "npm --prefix ../frontend run build",
+    "start:full": "npm run build:frontend && node index.js",
+    "gen:demo-images": "node scripts/genDemoImages.js",
+    "sync:google-reviews": "node scripts/syncGoogleReviews.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=20.20.0"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^8.3.0",
+    "@google-cloud/storage": "^7.19.0",
+    "@google-cloud/vertexai": "^1.10.0",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "midtrans-client": "^1.4.3",
+    "mongoose": "^7.0.0",
+    "multer": "^2.0.2",
+    "mysql2": "^3.17.4",
+    "openai": "^6.22.0",
+    "sequelize": "^6.37.7",
+    "uuid": "^13.0.0"
+  }
+}

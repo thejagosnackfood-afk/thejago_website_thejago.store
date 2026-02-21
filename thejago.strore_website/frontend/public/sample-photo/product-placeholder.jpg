@@ -1,0 +1,25 @@
+<svg width="120" height="120" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="productGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ff6b6b;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ee5a52;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="120" height="120" fill="url(#productGradient)" rx="8"/>
+  
+  <!-- Product Icon Placeholder -->
+  <g transform="translate(60, 60)">
+    <circle cx="0" cy="0" r="25" fill="rgba(255,255,255,0.2)" stroke="rgba(255,255,255,0.4)" stroke-width="2"/>
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="20" fill="white" text-anchor="middle">🍗</text>
+  </g>
+  
+  <!-- Flash Icon -->
+  <text x="15" y="25" font-family="Arial, sans-serif" font-size="16" fill="white">⚡</text>
+  
+  <!-- Decorative Elements -->
+  <circle cx="20" cy="90" r="3" fill="rgba(255,255,255,0.3)"/>
+  <circle cx="100" cy="20" r="2" fill="rgba(255,255,255,0.2)"/>
+  <circle cx="95" cy="95" r="4" fill="rgba(255,255,255,0.1)"/>
+</svg>
