@@ -1,0 +1,28 @@
+node_modules/
+.next/
+out/
+build/
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.npm-cache/
+.gcloud-tmp/
+*.log
+firebase-debug.log*
+.firebase/
+
+# Local tooling / artifacts (not needed for Railway deploy)
+.codex
+.codex/
+thejago-live/
+*.pid
+firebase-local-hosting.pid
+firebase-live-static.*.log
+deploy-clean/
+calculator-logic-export/
+
+# Secrets (do not commit)
+env/service-account.json
+env/sample database/*.json

@@ -1,0 +1,12 @@
+node_modules
+.next
+.git
+.firebase
+*.log
+.env
+.env.*
+deploy-clean
+calculator-logic-export
+thejago-live
+.codex
+

@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "thejagosnackfood-420"
+  },
+  "targets": {
+    "thejagosnackfood-420": {
+      "hosting": {
+        "calculator": [
+          "thejago-calculator"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

@@ -1,0 +1,13 @@
+node_modules
+skills
+.git
+.firebase
+.next
+*.log
+.env
+.env.local
+.env.*
+deploy-clean
+calculator-logic-export
+.codex
+

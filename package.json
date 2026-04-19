@@ -1,0 +1,37 @@
+{
+  "author": "",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.103.3",
+    "@tailwindcss/postcss": "^4.2.2",
+    "autoprefixer": "^10.4.27",
+    "clsx": "^2.1.1",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "firebase": "^12.11.0",
+    "firebase-admin": "^13.7.0",
+    "long": "^5.3.2",
+    "lucide-react": "^0.577.0",
+    "midtrans-client": "^1.4.3",
+    "next": "^16.2.0",
+    "postcss": "^8.5.8",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "tailwind-merge": "^3.5.0",
+    "tailwindcss": "^4.2.2"
+  },
+  "description": "",
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "thejago.store",
+  "scripts": {
+    "build": "next build",
+    "dev": "next dev --webpack",
+    "lint": "next lint",
+    "start": "node server.js"
+  },
+  "version": "1.0.0",
+  "devDependencies": {
+    "@railway/cli": "^4.40.0"
+  }
+}
