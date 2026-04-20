@@ -19,7 +19,17 @@ function resolveGatewayConfig() {
     const gatewayUrl = process.env.WHATSAPP_GATEWAY_URL || '';
     const gatewayToken = process.env.WHATSAPP_GATEWAY_TOKEN || process.env.FONTE_TOKEN || '';
     const gatewayAuthHeader = process.env.WHATSAPP_GATEWAY_AUTH_HEADER || 'Authorization';
-    const gatewayTokenPrefix = process.env.WHATSAPP_GATEWAY_TOKEN_PREFIX || 'Bearer';
+
+    // Allow disabling the token prefix by setting WHATSAPP_GATEWAY_TOKEN_PREFIX to:
+    // - empty string
+    // - "none" / "raw"
+    // Default is "Bearer", except Fonnte which typically expects the raw token.
+    const configuredPrefix = process.env.WHATSAPP_GATEWAY_TOKEN_PREFIX;
+    const isFonnte = /fonnte\.com/i.test(gatewayUrl);
+    const defaultPrefix = isFonnte ? '' : 'Bearer';
+    let gatewayTokenPrefix = configuredPrefix !== undefined ? configuredPrefix : defaultPrefix;
+    if (gatewayTokenPrefix && /^(none|raw)$/i.test(gatewayTokenPrefix.trim())) gatewayTokenPrefix = '';
+
     const authValue = gatewayTokenPrefix ? `${gatewayTokenPrefix} ${gatewayToken}`.trim() : gatewayToken;
 
     return { gatewayUrl, gatewayToken, gatewayAuthHeader, authValue };
@@ -40,23 +50,27 @@ async function sendToGateway({ to, message }) {
         throw new Error('WHATSAPP_GATEWAY_URL / WHATSAPP_GATEWAY_TOKEN belum di-set');
     }
 
-    const headers = {
-        'Content-Type': 'application/json',
-        [gatewayAuthHeader]: authValue,
-    };
+    const isFonnte = /fonnte\.com/i.test(gatewayUrl);
 
-    const gatewayToField =
-        process.env.WHATSAPP_GATEWAY_TO_FIELD || (/fonnte\.com/i.test(gatewayUrl) ? 'target' : 'to');
+    const gatewayToField = process.env.WHATSAPP_GATEWAY_TO_FIELD || (isFonnte ? 'target' : 'to');
     const gatewayMessageField = process.env.WHATSAPP_GATEWAY_MESSAGE_FIELD || 'message';
-    const payload = {
-        [gatewayToField]: to,
-        [gatewayMessageField]: message,
-    };
+    const payload = { [gatewayToField]: to, [gatewayMessageField]: message };
+
+    // Fonnte commonly expects form-urlencoded; other gateways usually accept JSON.
+    const headers = { [gatewayAuthHeader]: authValue };
+    let body;
+    if (isFonnte) {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        body = new URLSearchParams(payload);
+    } else {
+        headers['Content-Type'] = 'application/json';
+        body = JSON.stringify(payload);
+    }
 
     const response = await fetch(gatewayUrl, {
         method: 'POST',
         headers,
-        body: JSON.stringify(payload),
+        body,
     });
 
     const responseText = await response.text();
