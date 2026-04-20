@@ -264,22 +264,66 @@
         }
         function bulk_OnFile(i) { if(i.files[0]) { b_file = i.files[0]; document.getElementById('bulk_file_label').innerText = "📂 " + b_file.name; document.getElementById('bulk_btn_execute').disabled = false; document.getElementById('bulk_btn_execute').classList.remove('btn-disabled'); } }
         async function bulk_Execute() {
-            const workbook = XLSX.read(await b_file.arrayBuffer());
-            const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+            const workbook = XLSX.read(await b_file.arrayBuffer(), { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const sheet = workbook.Sheets[sheetName];
+            const aoa = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
             const cB = MASTER_CONFIG[b_mp];
             const bPk = parseFloat(document.getElementById('bulk_input_packing').value)||0, bAd = parseFloat(document.getElementById('bulk_input_ads').value)||0, bOt = parseFloat(document.getElementById('bulk_input_other').value)||0;
             
-            b_res = json.map(row => {
-                const n = (row.Product || row['Nama Produk'] || "").toString().toLowerCase().trim(), p = parseFloat(row.Price || row['Harga Jual'] || 0), c = b_hpp_map[n] || 0;
-                let f = (p * (cB?.f || 10) / 100) + (cB?.x || 0);
-                b_extras_state.forEach(e => { if(e.c) f += (p * e.v / 100); });
-                return { ...row, 'HPP_DB': c, 'Potongan_Fee': Math.round(f), 'Op_Cost': bPk+bAd+bOt, 'Profit_Net': Math.round(p - f - c - bPk - bAd - bOt) };
-            });
-            document.getElementById('bulk_ui_dl_area').classList.remove('hidden'); alert("Selesai!");
+            let nameIdx = -1, priceIdx = -1, headerRowIdx = -1;
+
+            for (let r = 0; r < Math.min(10, aoa.length); r++) {
+                const row = aoa[r];
+                for (let c = 0; c < row.length; c++) {
+                    const cell = String(row[c]).toLowerCase().trim();
+                    if (['nama produk', 'product_name', 'et_title_product_name', 'nama menu', '*itemname', 'product name', 'nama'].includes(cell)) nameIdx = c;
+                    if (['harga', 'price', 'et_title_variation_price', '*price', 'harga ritel (mata uang lokal)', 'harga jual', 'harga produk'].includes(cell)) priceIdx = c;
+                }
+                if (nameIdx !== -1 && priceIdx !== -1) {
+                    headerRowIdx = r;
+                    break;
+                }
+            }
+
+            if (nameIdx === -1 || priceIdx === -1) {
+                alert("Gagal mendeteksi kolom Nama Produk atau Harga pada file ini. Pastikan format laporan sesuai.");
+                return;
+            }
+
+            for (let r = 0; r < aoa.length; r++) {
+                const row = aoa[r];
+                if (r === headerRowIdx) {
+                    row.push("HPP_DB", "Potongan_Fee", "Op_Cost", "Profit_Net");
+                    continue;
+                }
+                if (r < headerRowIdx) {
+                    row.push("", "", "", "");
+                    continue;
+                }
+
+                const nameVal = String(row[nameIdx] || "").toLowerCase().trim();
+                const p = parseFloat(row[priceIdx]) || 0;
+                
+                if (nameVal && p > 0) {
+                    const c = b_hpp_map[nameVal] || 0;
+                    let f = (p * (cB?.f || 10) / 100) + (cB?.x || 0);
+                    b_extras_state.forEach(e => { if(e.c) f += (p * e.v / 100); });
+                    row.push(c, Math.round(f), bPk+bAd+bOt, Math.round(p - f - c - bPk - bAd - bOt));
+                } else {
+                    row.push("", "", "", "");
+                }
+            }
+
+            b_res = aoa;
+            document.getElementById('bulk_ui_dl_area').classList.remove('hidden'); 
+            alert("Selesai!");
         }
         function bulk_Download() {
-            const csv = XLSX.utils.sheet_to_csv(XLSX.utils.json_to_sheet(b_res));
-            const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = "thejago_bulk_report.csv"; a.click();
+            const ws = XLSX.utils.aoa_to_sheet(b_res);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Laporan Jago");
+            XLSX.writeFile(wb, "TheJago_Analisis_" + b_file.name);
         }
     </script>
 </body>
