@@ -11,6 +11,13 @@ app.use(express.json({ limit: '1mb' }));
 const PORT = process.env.PORT || 8080;
 const SERVICE_NAME = process.env.SERVICE_NAME || 'railway-whatsapp-service';
 const APP_VERSION = process.env.npm_package_version || '1.0.0';
+const BACKEND_UI_ORIGIN = (process.env.BACKEND_UI_ORIGIN || 'https://thejago-calculator.web.app').replace(/\/+$/, '');
+
+function shouldRedirectBackendUi() {
+    // Default: redirect UI pages to Firebase Hosting to avoid client-side runtime issues on API host.
+    // Set `BACKEND_UI_REDIRECT=false` to serve UI directly from this service.
+    return String(process.env.BACKEND_UI_REDIRECT || 'true').toLowerCase() !== 'false';
+}
 
 function normalizePhone(rawValue = '') {
     return String(rawValue).replace(/[^0-9+]/g, '').trim();
@@ -494,6 +501,17 @@ app.post('/send', async (req, res) => {
 });
 
 // 2. SERVE KALKULATOR & BACKEND STATIS
+// Redirect UI pages to Firebase Hosting (stable host for static Next export),
+// while keeping API endpoints (/status, /send, /api/whatsapp/send) on Railway.
+if (shouldRedirectBackendUi()) {
+    app.get('/backend/pendaftaran.html', (req, res) =>
+        res.redirect(302, `${BACKEND_UI_ORIGIN}/backend/pendaftaran.html`)
+    );
+    app.get('/backend/index.html', (req, res) =>
+        res.redirect(302, `${BACKEND_UI_ORIGIN}/backend/index.html`)
+    );
+}
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res) => {
