@@ -147,32 +147,38 @@ export default function PendaftaranMemberPage() {
             </div>
 
             {/* CARD FRONT */}
-            <div className="w-full aspect-[1.6/1] bg-gradient-to-br from-red-600 to-red-800 rounded-[20px] shadow-2xl relative overflow-hidden text-white p-6 flex flex-col justify-between group hover:scale-[1.02] transition-transform duration-500">
+            <div className="w-full aspect-[1.6/1] bg-red-800 rounded-[20px] shadow-2xl relative overflow-hidden text-white group hover:scale-[1.02] transition-transform duration-500">
+               <img src="/icon/mbg.webp" className="absolute inset-0 w-full h-full object-cover opacity-60" alt="Background" />
                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-20 -mt-20 blur-3xl"></div>
-               <div className="relative z-10 flex justify-between items-start">
-                  <div>
-                    <h3 className="text-xl font-black tracking-tight leading-none uppercase drop-shadow-sm">THE JAGO</h3>
-                    <p className="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase mt-1 text-left">Snack & Frozen Food</p>
+               <div className="relative z-10 p-6 h-full flex flex-col justify-between">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-xl font-black tracking-tight leading-none uppercase drop-shadow-md">THE JAGO</h3>
+                      <p className="text-[8px] font-bold tracking-[0.2em] opacity-80 uppercase mt-1 text-left">Snack & Frozen Food</p>
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-60 mb-1">Kartu Member</p>
+                      <h4 className="text-base font-black leading-tight truncate max-w-[150px] uppercase italic text-right">{formData.fullName}</h4>
+                      <p className="text-sm font-black tracking-tighter mt-1">{formData.memberId}</p>
+                    </div>
                   </div>
-                  <div className="text-right flex flex-col items-end">
-                    <p className="text-[8px] font-black uppercase tracking-[0.3em] opacity-60 mb-1">Kartu Member</p>
-                    <h4 className="text-base font-black leading-tight truncate max-w-[150px] uppercase italic text-right">{formData.fullName}</h4>
-                    <p className="text-sm font-black tracking-tighter mt-1">{formData.memberId}</p>
+                  <div className="flex-1 flex items-center justify-center gap-4 py-2">
+                    <div className="w-20 h-20 bg-white rounded-xl shadow-lg flex items-center justify-center p-1 shrink-0 overflow-hidden border-2 border-red-500/20">
+                      <img src="/icon/logomember.png" className="w-full h-full object-contain" alt="Logo" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-1">
+                      {['Shopee', 'TikTok', 'Lazada', 'GoFood'].map(mp => (
+                        <div key={mp} className="bg-black/20 backdrop-blur-md px-2 py-1 rounded text-[6px] font-black uppercase border border-white/10">{mp}</div>
+                      ))}
+                    </div>
                   </div>
-               </div>
-               <div className="flex-1 flex items-center justify-center gap-4 py-2">
-                  <div className="w-20 h-20 bg-white rounded-xl shadow-lg flex items-center justify-center p-1.5 shrink-0 overflow-hidden">
-                    <img src="/backend/icon/logomember.png" className="w-full h-full object-contain" alt="Logo" />
+                  <div className="relative z-10 flex justify-between items-end border-t border-white/10 pt-2">
+                    <div className="flex items-center gap-2">
+                      <img src="/icon/parahyangan.jpg" className="w-4 h-4 rounded-full border border-white/50" alt="Partner" />
+                      <p className="text-[7px] font-bold italic opacity-80 text-left uppercase">Baleendah, Bandung • 0821-1020-2044</p>
+                    </div>
+                    <p className="text-[7px] font-black uppercase tracking-widest italic">thejago.store</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-1">
-                    {['Shopee', 'TikTok', 'Lazada', 'GoFood'].map(mp => (
-                      <div key={mp} className="bg-white/10 backdrop-blur-md px-2 py-1 rounded text-[6px] font-black uppercase border border-white/10">{mp}</div>
-                    ))}
-                  </div>
-               </div>
-               <div className="relative z-10 flex justify-between items-end border-t border-white/10 pt-2">
-                  <p className="text-[7px] font-bold italic opacity-80 text-left uppercase">Baleendah, Bandung • 0821-1020-2044</p>
-                  <p className="text-[7px] font-black uppercase tracking-widest italic">thejago.store</p>
                </div>
             </div>
 
