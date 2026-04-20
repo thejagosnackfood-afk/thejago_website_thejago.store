@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.set('trust proxy', 1);
@@ -13,6 +14,23 @@ const APP_VERSION = process.env.npm_package_version || '1.0.0';
 
 function normalizePhone(rawValue = '') {
     return String(rawValue).replace(/[^0-9+]/g, '').trim();
+}
+
+function normalizeMsisdn(rawValue = '') {
+    let v = String(rawValue || '').replace(/[^0-9+]/g, '').trim();
+    if (!v) return '';
+    if (v.startsWith('+')) v = v.slice(1);
+    if (v.startsWith('0')) v = `62${v.slice(1)}`;
+    if (v.startsWith('8')) v = `62${v}`;
+    return v;
+}
+
+function whatsappTransport() {
+    const raw = process.env.WHATSAPP_TRANSPORT || process.env.WHATSAPP_MODE || '';
+    const t = String(raw).trim().toLowerCase();
+    if (t) return t;
+    if (String(process.env.WHATSAPP_WEB || 'false').toLowerCase() === 'true') return 'web';
+    return 'gateway';
 }
 
 function resolveGatewayConfig() {
@@ -42,6 +60,152 @@ function isDryRunEnabled() {
 function isGatewayConfigured() {
     const { gatewayUrl, gatewayToken } = resolveGatewayConfig();
     return Boolean(gatewayUrl && gatewayToken);
+}
+
+// -------------------------
+// WhatsApp Web (Baileys)
+// -------------------------
+let waSock = null;
+let waStarting = null;
+let waStatus = {
+    status: 'offline', // 'offline' | 'qr' | 'online'
+    qr: null, // data URL
+    me: null,
+    lastError: null,
+    updatedAt: null,
+};
+
+function waAuthDir() {
+    // For persistence on Railway, mount a Volume and set WHATSAPP_AUTH_DIR to that mount path.
+    // Example: WHATSAPP_AUTH_DIR=/data/wa-auth
+    return (
+        process.env.WHATSAPP_AUTH_DIR ||
+        process.env.WA_AUTH_DIR ||
+        path.join(__dirname, 'data', 'wa-auth')
+    );
+}
+
+async function ensureWhatsAppWeb() {
+    if (waSock) return waSock;
+    if (waStarting) return waStarting;
+
+    waStarting = (async () => {
+        const transport = whatsappTransport();
+        if (transport !== 'web') return null;
+
+        // Lazy-require so gateway-only deployments don't pay the cost.
+        // eslint-disable-next-line global-require
+        const baileys = require('@whiskeysockets/baileys');
+        // eslint-disable-next-line global-require
+        const qrcode = require('qrcode');
+
+        const authDir = waAuthDir();
+        fs.mkdirSync(authDir, { recursive: true });
+
+        const { state, saveCreds } = await baileys.useMultiFileAuthState(authDir);
+        const { version } = await baileys.fetchLatestBaileysVersion();
+
+        const sock = baileys.default({
+            version,
+            auth: state,
+            printQRInTerminal: false,
+            // Keep logs minimal on Railway
+            logger: require('pino')({ level: process.env.WHATSAPP_LOG_LEVEL || 'silent' }),
+        });
+
+        sock.ev.on('creds.update', saveCreds);
+
+        sock.ev.on('connection.update', async (update) => {
+            const { connection, qr, lastDisconnect } = update || {};
+
+            if (qr) {
+                try {
+                    waStatus.qr = await qrcode.toDataURL(qr);
+                    waStatus.status = 'qr';
+                    waStatus.lastError = null;
+                    waStatus.updatedAt = new Date().toISOString();
+                } catch (err) {
+                    waStatus.lastError = err?.message || String(err);
+                }
+            }
+
+            if (connection === 'open') {
+                waStatus.status = 'online';
+                waStatus.qr = null;
+                waStatus.me = sock.user || null;
+                waStatus.lastError = null;
+                waStatus.updatedAt = new Date().toISOString();
+            }
+
+            if (connection === 'close') {
+                waStatus.me = null;
+                waStatus.updatedAt = new Date().toISOString();
+
+                const statusCode = lastDisconnect?.error?.output?.statusCode;
+                const isLoggedOut =
+                    statusCode === baileys.DisconnectReason.loggedOut ||
+                    statusCode === baileys.DisconnectReason.badSession;
+
+                waStatus.status = 'offline';
+                waSock = null;
+                waStarting = null;
+
+                if (isLoggedOut) {
+                    // Force a fresh QR next time.
+                    try {
+                        fs.rmSync(authDir, { recursive: true, force: true });
+                    } catch {
+                        // ignore
+                    }
+                } else {
+                    // Attempt reconnect shortly.
+                    setTimeout(() => {
+                        ensureWhatsAppWeb().catch(() => {});
+                    }, 1500);
+                }
+            }
+        });
+
+        waSock = sock;
+        return waSock;
+    })()
+        .catch((err) => {
+            waStatus.lastError = err?.message || String(err);
+            waStatus.status = 'offline';
+            waStatus.updatedAt = new Date().toISOString();
+            waSock = null;
+            waStarting = null;
+            throw err;
+        })
+        .finally(() => {
+            // Keep waStarting for callers awaiting; reset will happen on close/error.
+        });
+
+    return waStarting;
+}
+
+function waWebSnapshot() {
+    return { ...waStatus };
+}
+
+async function sendViaWhatsAppWeb({ to, message }) {
+    const sock = await ensureWhatsAppWeb();
+    if (!sock || waStatus.status !== 'online') {
+        const err = new Error('WhatsApp Web belum login. Scan QR dulu.');
+        err.code = 'WA_NOT_ONLINE';
+        throw err;
+    }
+
+    const msisdn = normalizeMsisdn(to);
+    if (!msisdn) {
+        const err = new Error('Nomor WhatsApp tidak valid');
+        err.code = 'WA_BAD_NUMBER';
+        throw err;
+    }
+
+    const jid = `${msisdn}@s.whatsapp.net`;
+    await sock.sendMessage(jid, { text: message });
+    return { jid };
 }
 
 async function sendToGateway({ to, message }) {
@@ -136,14 +300,47 @@ app.get('/health/deps', async (req, res) => {
 
 // 1.1 Legacy endpoint untuk halaman /backend/pendaftaran.html
 app.get('/status', (req, res) => {
+    const transport = whatsappTransport();
     const configured = isGatewayConfigured();
     const dryRun = isDryRunEnabled();
-    const online = dryRun || configured;
+    const webEnabled = transport === 'web';
+
+    if (dryRun) {
+        return res.status(200).json({
+            ok: true,
+            status: 'online',
+            qr: null,
+            transport,
+            source: 'railway-api',
+            timestamp: new Date().toISOString(),
+        });
+    }
+
+    if (webEnabled) {
+        // Start/keep the WA session alive; status response includes QR (data URL) when needed.
+        ensureWhatsAppWeb().catch(() => {});
+        const snap = waWebSnapshot();
+        const online = snap.status === 'online';
+        const status = online ? 'online' : snap.qr ? 'qr' : 'offline';
+        return res.status(200).json({
+            // Frontend pendaftaran only consumes data when `ok === true`.
+            ok: true,
+            status,
+            qr: snap.qr,
+            transport: 'web',
+            detail: snap.lastError ? `error: ${snap.lastError}` : null,
+            source: 'railway-api',
+            timestamp: new Date().toISOString(),
+        });
+    }
+
+    const online = configured;
 
     return res.status(200).json({
         ok: online,
         status: online ? 'online' : 'offline',
         qr: null,
+        transport: 'gateway',
         source: 'railway-api',
         timestamp: new Date().toISOString(),
     });
@@ -154,6 +351,7 @@ app.post('/api/whatsapp/send', async (req, res) => {
     const to = normalizePhone(req.body?.to);
     const message = String(req.body?.message || '').trim();
     const dryRun = isDryRunEnabled();
+    const transport = whatsappTransport();
     const { gatewayUrl, gatewayToken } = resolveGatewayConfig();
 
     if (!to || !message) {
@@ -163,10 +361,39 @@ app.post('/api/whatsapp/send', async (req, res) => {
         });
     }
 
-    if (dryRun || !gatewayUrl || !gatewayToken) {
+    if (dryRun) {
         return res.status(dryRun ? 200 : 202).json({
             success: true,
-            mode: dryRun ? 'dry-run' : 'mock',
+            mode: 'dry-run',
+            message: 'WhatsApp API aktif, tapi gateway belum dipakai',
+            detail: `Pesan terjadwal ke ${to}`,
+        });
+    }
+
+    if (transport === 'web') {
+        try {
+            const result = await sendViaWhatsAppWeb({ to, message });
+            return res.status(200).json({
+                success: true,
+                mode: 'web',
+                to: normalizeMsisdn(to),
+                result,
+            });
+        } catch (error) {
+            return res.status(error.code === 'WA_NOT_ONLINE' ? 409 : 502).json({
+                success: false,
+                mode: 'web',
+                error: error.message,
+                status: waStatus.status,
+                qr: waStatus.qr,
+            });
+        }
+    }
+
+    if (!gatewayUrl || !gatewayToken) {
+        return res.status(202).json({
+            success: true,
+            mode: 'mock',
             message: 'WhatsApp API aktif, tapi gateway belum dipakai',
             detail: `Pesan terjadwal ke ${to}`,
         });
@@ -195,6 +422,7 @@ app.post('/send', async (req, res) => {
     const to = normalizePhone(req.body?.phone || req.body?.to);
     const message = String(req.body?.message || 'Kartu member Anda sudah siap.').trim();
     const dryRun = isDryRunEnabled();
+    const transport = whatsappTransport();
     const { gatewayUrl, gatewayToken } = resolveGatewayConfig();
 
     if (!to) {
@@ -211,10 +439,38 @@ app.post('/send', async (req, res) => {
         });
     }
 
-    if (dryRun || !gatewayUrl || !gatewayToken) {
+    if (dryRun) {
         return res.status(200).json({
             ok: true,
-            mode: dryRun ? 'dry-run' : 'mock',
+            mode: 'dry-run',
+            detail: `Pesan terjadwal ke ${to}`,
+        });
+    }
+
+    if (transport === 'web') {
+        try {
+            const result = await sendViaWhatsAppWeb({ to, message });
+            return res.status(200).json({
+                ok: true,
+                mode: 'web',
+                to: normalizeMsisdn(to),
+                result,
+            });
+        } catch (error) {
+            return res.status(error.code === 'WA_NOT_ONLINE' ? 409 : 502).json({
+                ok: false,
+                mode: 'web',
+                error: error.message,
+                status: waStatus.status,
+                qr: waStatus.qr,
+            });
+        }
+    }
+
+    if (!gatewayUrl || !gatewayToken) {
+        return res.status(200).json({
+            ok: true,
+            mode: 'mock',
             detail: `Pesan terjadwal ke ${to}`,
         });
     }
