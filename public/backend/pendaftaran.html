@@ -3,308 +3,190 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Pendaftaran Member | The Jago</title>
+
+    <title>Pendaftaran Member | THE JAGO</title>
+    <meta name="description" content="Pendaftaran member + bulk import CSV/Excel + kirim WhatsApp otomatis." />
+
     <link rel="shortcut icon" href="/backend/icon/logomember.png" />
     <link rel="icon" href="/backend/icon/logomember.png" />
+    <link rel="apple-touch-icon" href="/backend/icon/logomember.png" />
+
+    <link rel="stylesheet" href="/backend/_next/static/css/0a04a5953fa5bf7e.css" data-precedence="next" />
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
 
     <style>
-      :root {
-        --bg: #fdfcfb;
-        --card: #ffffff;
-        --text: #111827;
-        --muted: #6b7280;
-        --border: #e5e7eb;
-        --red: #dc2626;
-        --red2: #b91c1c;
-        --green: #16a34a;
-        --amber: #d97706;
-      }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0;
-        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-        background: var(--bg);
-        color: var(--text);
-      }
-      a { color: inherit; }
-      .container { max-width: 1100px; margin: 0 auto; padding: 18px 16px 60px; }
-      .nav {
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid #f3f4f6;
-      }
-      .nav-inner { max-width: 1100px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-      .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-      .logo {
-        width: 40px; height: 40px; border-radius: 14px;
-        background: linear-gradient(135deg, var(--red), var(--red2));
-        box-shadow: 0 14px 30px rgba(220, 38, 38, 0.18);
-        display: grid; place-items: center;
-        color: #fff; font-weight: 900;
-      }
-      .brand h1 { margin: 0; font-size: 16px; font-weight: 900; letter-spacing: -0.02em; color: var(--red); font-style: italic; }
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 7px 10px;
-        border-radius: 999px;
-        background: #f9fafb;
-        border: 1px solid var(--border);
-        font-size: 11px;
-        font-weight: 900;
-        text-transform: uppercase;
-        letter-spacing: 0.18em;
-        color: #374151;
-      }
-      .dot { width: 8px; height: 8px; border-radius: 999px; background: #ef4444; box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.15); }
-      .dot.online { background: #22c55e; box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.15); }
-      .dot.qr { background: #f59e0b; box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15); }
-
-      .grid { display: grid; grid-template-columns: 1fr; gap: 18px; }
-      @media (min-width: 980px) {
-        .grid { grid-template-columns: 1.1fr 0.9fr; }
-      }
-
-      .hero {
-        background: #fef2f2;
-        border: 1px solid #fee2e2;
-        border-radius: 26px;
-        padding: 18px;
-      }
-      .hero h2 { margin: 0; font-size: 22px; font-weight: 950; color: #7f1d1d; }
-      .hero p { margin: 8px 0 0; font-size: 13px; color: rgba(127, 29, 29, 0.75); font-weight: 600; line-height: 1.55; }
-
-      .card { background: var(--card); border: 1px solid #f3f4f6; border-radius: 26px; padding: 16px; box-shadow: 0 12px 30px rgba(17, 24, 39, 0.06); }
-      .card h3 { margin: 0 0 10px; font-size: 12px; font-weight: 950; text-transform: uppercase; letter-spacing: 0.22em; color: #9ca3af; }
-
-      .qrwrap {
-        display: grid;
-        place-items: center;
-        padding: 16px;
-        border-radius: 26px;
-        border: 10px solid #f9fafb;
-        background: #fff;
-        box-shadow: inset 0 0 0 1px #f3f4f6;
-      }
-      .qrbox { width: 320px; height: 320px; display: grid; place-items: center; border-radius: 18px; border: 1px dashed #e5e7eb; background: linear-gradient(135deg, #ffffff, #fafafa); }
-      .qrbox img { width: 280px; height: 280px; object-fit: contain; }
-      .help { margin-top: 12px; font-size: 12px; color: var(--muted); line-height: 1.6; }
-      .help code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; font-size: 11px; background: #f3f4f6; padding: 2px 6px; border-radius: 8px; }
-
-      .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
-      .row > * { flex: 1 1 auto; }
-      .input {
-        width: 100%;
-        padding: 10px 12px;
-        border-radius: 14px;
-        border: 1px solid #e5e7eb;
-        background: #fafafa;
-        font-weight: 700;
-        font-size: 12px;
-        outline: none;
-      }
-      .input:focus { background: #fff; border-color: #fca5a5; box-shadow: 0 0 0 3px rgba(252, 165, 165, 0.28); }
-
-      .btn {
-        border: 0;
-        border-radius: 14px;
-        padding: 10px 12px;
-        font-size: 12px;
-        font-weight: 950;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        cursor: pointer;
-        transition: transform 0.08s ease, box-shadow 0.15s ease, filter 0.15s ease;
-      }
-      .btn:active { transform: translateY(1px); }
-      .btn-red { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; box-shadow: 0 14px 28px rgba(220, 38, 38, 0.20); }
-      .btn-gray { background: #111827; color: #fff; box-shadow: 0 14px 28px rgba(17, 24, 39, 0.18); }
-      .btn-ghost { background: #fff; border: 1px solid #e5e7eb; color: #111827; }
-      .btn:disabled { opacity: 0.35; cursor: not-allowed; filter: grayscale(1); box-shadow: none; }
-
-      .area {
-        width: 100%;
-        min-height: 120px;
-        padding: 10px 12px;
-        border-radius: 16px;
-        border: 1px solid #e5e7eb;
-        background: #fafafa;
-        font-size: 12px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        line-height: 1.35;
-        outline: none;
-      }
-      .area:focus { background: #fff; border-color: #fca5a5; box-shadow: 0 0 0 3px rgba(252, 165, 165, 0.28); }
-
-      table { width: 100%; border-collapse: collapse; }
-      th, td { padding: 8px 8px; border-bottom: 1px solid #f3f4f6; font-size: 12px; text-align: left; }
-      th { color: #6b7280; font-size: 11px; text-transform: uppercase; letter-spacing: 0.14em; }
-      .muted { color: var(--muted); font-size: 12px; }
-
-      .toast {
-        position: fixed;
-        left: 12px;
-        right: 12px;
-        bottom: 12px;
-        z-index: 9999;
-        max-width: 1100px;
-        margin: 0 auto;
-        background: #111827;
-        color: #fff;
-        border-radius: 16px;
-        padding: 12px 14px;
-        font: 12px/1.45 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        box-shadow: 0 16px 34px rgba(0,0,0,0.25);
-        display: none;
-        white-space: pre-wrap;
-      }
-      .toast.show { display: block; }
-
-      .badge { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 950; text-transform: uppercase; letter-spacing: 0.12em; border: 1px solid #e5e7eb; background: #fff; }
-      .badge.online { border-color: #bbf7d0; background: #dcfce7; color: #166534; }
-      .badge.qr { border-color: #fde68a; background: #fffbeb; color: #92400e; }
-      .badge.offline { border-color: #fecaca; background: #fef2f2; color: #991b1b; }
-
-      footer { margin-top: 32px; text-align: center; color: #d1d5db; font-size: 10px; font-weight: 950; letter-spacing: 0.35em; text-transform: uppercase; }
+      /* Tailwind file is precompiled; keep minimal CSS for dynamic badges/toast. */
+      .jago-toast { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 99999; }
+      @media (min-width: 1024px) { .jago-toast { left: 50%; right: auto; transform: translateX(-50%); width: 900px; } }
     </style>
-
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
   </head>
 
-  <body>
-    <div class="nav">
-      <div class="nav-inner">
-        <a class="brand" href="/backend/index.html">
-          <div class="logo">WA</div>
-          <h1>THE JAGO</h1>
-        </a>
-        <div class="pill" title="Status WhatsApp">
-          <span id="wa_dot" class="dot"></span>
-          <span id="wa_label">Offline</span>
+  <body class="__className_862193 min-w-[600px] min-h-[600px] overflow-auto text-left">
+    <div class="min-h-screen bg-[#FDFCFB] text-[#1A1A1A] font-sans pb-20">
+      <nav class="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-6xl mx-auto px-4 h-20 flex items-center justify-between">
+          <a href="/backend/index.html" class="flex items-center gap-3 hover:opacity-90 transition-opacity">
+            <div class="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-lg shadow-red-100 text-white font-black">WA</div>
+            <h1 class="text-lg font-black tracking-tight text-red-600 italic uppercase">THE JAGO</h1>
+          </a>
+
+          <div class="hidden md:flex items-center gap-1 bg-gray-50 p-1 rounded-2xl border border-gray-100">
+            <button type="button" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all bg-white text-red-600 shadow-sm">1. Login WA</button>
+            <button type="button" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-gray-400">2. Data</button>
+            <button type="button" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-gray-400">3. Kirim</button>
+          </div>
+
+          <div class="flex items-center gap-3">
+            <div id="wa_dot" class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
+            <span id="wa_label" class="text-[10px] font-black uppercase tracking-widest text-gray-500">Offline</span>
+          </div>
         </div>
-      </div>
-    </div>
+      </nav>
 
-    <div class="container">
-      <div class="hero">
-        <h2>Pendaftaran Member</h2>
-        <p>Hubungkan WhatsApp Web (Linked Devices) dan lakukan bulk import dari <b>CSV / Excel</b> dengan format kolom: <code>memberId,name,whatsapp</code>.</p>
-      </div>
+      <main class="max-w-6xl mx-auto px-4 mt-10">
+        <div class="mb-4">
+          <p class="text-[10px] font-black uppercase tracking-[0.5em] text-red-600 opacity-50 text-left">backend</p>
+        </div>
 
-      <div class="grid" style="margin-top: 16px;">
-        <div style="display: grid; gap: 18px;">
-          <div class="card">
-            <h3>1. Hubungkan WhatsApp</h3>
-
-            <div class="row" style="margin-bottom: 10px;">
-              <div style="flex: 2 1 420px;">
-                <div class="muted" style="margin-bottom: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em;">Base URL API WhatsApp (Railway)</div>
-                <input id="base_url" class="input" placeholder="https://...railway.app" />
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+          <div class="lg:col-span-7">
+            <div class="space-y-8">
+              <div class="bg-red-50 p-8 rounded-[32px] border border-red-100">
+                <h2 class="text-2xl font-black text-red-900 leading-tight">Pendaftaran Member</h2>
+                <p class="text-sm text-red-700/70 mt-3 font-medium leading-relaxed">
+                  Hubungkan WhatsApp Web (Linked Devices) dan lakukan bulk import dari <b>CSV / Excel</b> dengan format kolom:
+                  <span class="font-black">memberId, name, whatsapp</span>.
+                </p>
               </div>
-              <div style="flex: 1 1 180px; display: grid; gap: 8px;">
-                <button id="btn_save_base" class="btn btn-gray" type="button">Simpan URL</button>
-                <button id="btn_test" class="btn btn-ghost" type="button">Test /status</button>
-              </div>
-            </div>
 
-            <div class="row" style="justify-content: space-between; margin: 10px 0 12px;">
-              <div class="badge offline" id="wa_badge">OFFLINE</div>
-              <div class="muted" id="wa_detail">Menunggu status dari API...</div>
-            </div>
+              <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm space-y-6">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">1. Hubungkan WhatsApp</p>
+                    <p class="text-xs text-gray-500 font-medium mt-1">Scan QR untuk menautkan perangkat.</p>
+                  </div>
+                  <div id="wa_badge" class="px-4 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest bg-red-50 text-red-600 border border-red-100">OFFLINE</div>
+                </div>
 
-            <div class="qrwrap">
-              <div class="qrbox">
-                <img id="qr_img" alt="QR WhatsApp" style="display:none" />
-                <div id="qr_placeholder" class="muted" style="text-align:center; padding: 0 14px;">
-                  QR akan muncul di sini.
+                <div class="space-y-2">
+                  <p class="text-[10px] font-black uppercase tracking-widest text-gray-500">Base URL API WhatsApp (Railway)</p>
+                  <input id="base_url" class="w-full h-12 bg-gray-50 border border-gray-100 rounded-2xl px-5 text-sm font-black outline-none focus:bg-white focus:border-red-200" placeholder="https://...railway.app" />
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button id="btn_save_base" type="button" class="w-full h-12 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-gray-200 hover:bg-red-600 transition-all">Simpan URL</button>
+                  <button id="btn_test" type="button" class="w-full h-12 bg-white text-gray-900 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-gray-200 hover:border-red-200 hover:text-red-600 transition-all">Test /status</button>
+                </div>
+
+                <div class="flex items-center justify-between gap-3">
+                  <div id="wa_detail" class="text-[10px] font-black uppercase tracking-widest text-gray-400">Menunggu status dari API...</div>
+                  <div class="hidden md:block text-[10px] font-black uppercase tracking-widest text-gray-300">
+                    <a id="link_health" href="#" target="_blank" rel="noreferrer" class="hover:text-red-600 transition-all">/health</a>
+                    <span class="mx-2">•</span>
+                    <a id="link_status" href="#" target="_blank" rel="noreferrer" class="hover:text-red-600 transition-all">/status</a>
+                  </div>
+                </div>
+
+                <div class="flex flex-col items-center">
+                  <div class="relative bg-white p-4 rounded-[40px] border-[12px] border-gray-50 shadow-inner">
+                    <div class="w-[320px] h-[320px] flex flex-col items-center justify-center text-center">
+                      <img id="qr_img" alt="QR WhatsApp" class="w-[280px] h-[280px] object-contain hidden" />
+                      <div id="qr_placeholder" class="text-[10px] font-black uppercase tracking-widest text-gray-300">QR akan muncul di sini</div>
+                    </div>
+                  </div>
+                  <p class="mt-4 text-[10px] font-black uppercase tracking-widest text-gray-400 text-center">
+                    WhatsApp &gt; Settings &gt; Linked devices &gt; Link a device
+                  </p>
                 </div>
               </div>
-              <div class="help">
-                Scan QR ini lewat WhatsApp: <b>Settings</b> &gt; <b>Linked devices</b> &gt; <b>Link a device</b>.
-                <br />
-                Endpoint yang dipakai: <code>GET /status</code>.
+
+              <div class="bg-white p-10 rounded-[40px] border border-gray-100 shadow-sm space-y-6">
+                <div class="flex items-center justify-between gap-3">
+                  <div>
+                    <p class="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400">2. Bulk Import</p>
+                    <p class="text-xs text-gray-500 font-medium mt-1">Upload file CSV/Excel atau paste teks.</p>
+                  </div>
+                  <div id="send_stat" class="text-[10px] font-black uppercase tracking-widest text-gray-400">0 data</div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <input id="file" type="file" class="hidden" accept=".csv,.tsv,.xls,.xlsx" />
+                  <button id="btn_pick_file" type="button" class="md:col-span-2 w-full h-12 bg-gray-50 text-gray-900 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-gray-100 hover:bg-white hover:border-red-200 transition-all flex items-center justify-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-folder-open w-4 h-4" aria-hidden="true"><path d="m6 14 2-2 3 3 5-5 2 2"/><path d="M5 20a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2z"/></svg>
+                    Pilih File (CSV/Excel)
+                  </button>
+                  <button id="btn_parse" type="button" class="w-full h-12 bg-gray-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-gray-200 hover:bg-red-600 transition-all">Parse</button>
+                </div>
+
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">CSV Text</p>
+                  <textarea id="csv" class="w-full min-h-[120px] bg-gray-50 border border-gray-100 rounded-2xl p-4 text-[11px] font-bold outline-none focus:bg-white focus:border-red-200" placeholder="memberId,name,whatsapp\n20260102,AI JENAH,0895404965685"></textarea>
+                  <p id="file_hint" class="mt-2 text-[10px] font-black uppercase tracking-widest text-gray-300">Header fleksibel: ID_MEMBER / NAMA_MEMBER / TELP tetap terbaca.</p>
+                </div>
+
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-widest text-gray-500 mb-2">Template Pesan</p>
+                  <textarea id="tmpl" class="w-full min-h-[90px] bg-gray-50 border border-gray-100 rounded-2xl p-4 text-[11px] font-bold outline-none focus:bg-white focus:border-red-200">Halo {name}, kartu member Anda sudah siap. Nomor member: {memberId}.</textarea>
+                  <p class="mt-2 text-[10px] font-black uppercase tracking-widest text-gray-300">Placeholder: {name}, {memberId}, {whatsapp}</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button id="btn_send_all" type="button" disabled class="w-full h-12 bg-red-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-red-100 hover:bg-gray-900 transition-all disabled:bg-gray-100 disabled:text-gray-400 disabled:shadow-none">Kirim Semua</button>
+                  <button id="btn_clear" type="button" class="w-full h-12 bg-white text-gray-900 rounded-2xl text-[10px] font-black uppercase tracking-widest border border-gray-200 hover:border-red-200 hover:text-red-600 transition-all">Clear</button>
+                </div>
+
+                <div class="border border-gray-100 rounded-3xl overflow-auto">
+                  <table class="min-w-full">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th class="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">#</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">memberId</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">name</th>
+                        <th class="px-4 py-3 text-left text-[10px] font-black uppercase tracking-widest text-gray-400">whatsapp</th>
+                      </tr>
+                    </thead>
+                    <tbody id="rows" class="bg-white">
+                      <tr>
+                        <td colspan="4" class="px-4 py-6 text-center text-[10px] font-black uppercase tracking-widest text-gray-300">Belum ada data</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="card">
-            <h3>2. Bulk Import (CSV / Excel)</h3>
-
-            <div class="row">
-              <div style="flex: 2 1 420px;">
-                <div class="muted" style="margin-bottom: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em;">Upload File</div>
-                <input id="file" class="input" type="file" accept=".csv,.tsv,.xls,.xlsx" />
-                <div class="muted" id="file_hint" style="margin-top: 6px;">Bisa CSV / TSV / XLS / XLSX. Kolom otomatis dipetakan.</div>
-              </div>
-              <div style="flex: 1 1 240px; display: grid; gap: 8px;">
-                <button id="btn_parse" class="btn btn-gray" type="button">Parse</button>
-                <button id="btn_clear" class="btn btn-ghost" type="button">Clear</button>
+          <div class="lg:col-span-5 sticky top-32">
+            <div class="flex items-center justify-between mb-6">
+              <h3 class="text-[10px] font-black uppercase tracking-[0.3em] text-gray-400">Digital Card Engine</h3>
+              <div class="flex gap-2">
+                <span class="px-2 py-1 bg-red-50 text-red-600 text-[8px] font-black rounded-md border border-red-100">BULK</span>
+                <span class="px-2 py-1 bg-gray-50 text-gray-600 text-[8px] font-black rounded-md border border-gray-100">CSV/EXCEL</span>
               </div>
             </div>
 
-            <div style="margin-top: 12px;">
-              <div class="muted" style="margin-bottom: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em;">Atau Paste CSV</div>
-              <textarea id="csv" class="area" placeholder="memberId,name,whatsapp\n20260102,AI JENAH,0895404965685"></textarea>
-            </div>
-
-            <div style="margin-top: 12px;">
-              <div class="muted" style="margin-bottom: 6px; font-weight: 900; text-transform: uppercase; letter-spacing: 0.16em;">Template Pesan</div>
-              <textarea id="tmpl" class="area" style="min-height: 90px;" placeholder="Halo {name}, nomor member Anda {memberId}.">Halo {name}, kartu member Anda sudah siap. Nomor member: {memberId}.</textarea>
-              <div class="muted" style="margin-top: 6px;">Placeholder: <code>{name}</code>, <code>{memberId}</code>, <code>{whatsapp}</code></div>
-            </div>
-
-            <div class="row" style="margin-top: 12px;">
-              <button id="btn_send_all" class="btn btn-red" type="button" disabled>Kirim Semua</button>
-              <div class="muted" id="send_stat" style="text-align:right;">0 data</div>
-            </div>
-
-            <div style="margin-top: 14px; overflow:auto; border: 1px solid #f3f4f6; border-radius: 16px;">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>memberId</th>
-                    <th>name</th>
-                    <th>whatsapp</th>
-                  </tr>
-                </thead>
-                <tbody id="rows">
-                  <tr><td colspan="4" class="muted" style="padding: 14px;">Belum ada data.</td></tr>
-                </tbody>
-              </table>
+            <div class="bg-white p-8 rounded-[40px] border border-gray-100 shadow-sm space-y-4">
+              <p class="text-xs font-black text-gray-900">Tips</p>
+              <ul class="text-[11px] font-bold text-gray-500 space-y-2 list-disc pl-5">
+                <li>Pastikan Base URL menunjuk ke Railway (endpoint /status dan /send).</li>
+                <li>Jika status <b>SCAN QR</b>, scan ulang (Linked Devices).</li>
+                <li>Excel bisa kolom: ID_MEMBER, NAMA_MEMBER, TELP.</li>
+              </ul>
+              <div class="bg-amber-50 p-4 rounded-[24px] border border-amber-100">
+                <p class="text-[10px] font-black uppercase tracking-widest text-amber-700">Penting</p>
+                <p class="mt-2 text-[11px] font-bold text-amber-800/70">Pengiriman berjalan lewat WhatsApp Web. Jika service restart, bisa perlu scan QR lagi (tanpa volume auth).</p>
+              </div>
             </div>
           </div>
         </div>
+      </main>
 
-        <div style="display: grid; gap: 18px; align-content: start;">
-          <div class="card">
-            <h3>Catatan</h3>
-            <div class="muted" style="line-height: 1.7;">
-              Sistem akan mengirim pesan lewat endpoint <code>POST /send</code> pada Railway.
-              Jika WhatsApp belum terhubung, status akan <b>QR</b> dan Anda harus scan dulu.
-              <br /><br />
-              Jika format kolom berbeda (mis. <code>ID_MEMBER</code>, <code>NAMA_MEMBER</code>, <code>TELP</code>) tetap bisa, karena header dipetakan otomatis.
-            </div>
-          </div>
-
-          <div class="card">
-            <h3>Debug</h3>
-            <div class="muted" style="line-height: 1.7;">
-              <div><b>/status:</b> <a id="link_status" href="#" target="_blank" rel="noreferrer">-</a></div>
-              <div><b>/health:</b> <a id="link_health" href="#" target="_blank" rel="noreferrer">-</a></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <footer>Premium Automation System • The Jago 2026</footer>
+      <footer class="mt-20 text-center space-y-2">
+        <p class="text-[10px] font-black uppercase tracking-[0.4em] text-gray-300 italic">Premium Automation System • The Jago 2026</p>
+      </footer>
     </div>
 
-    <div id="toast" class="toast"></div>
+    <div id="toast" class="jago-toast hidden bg-gray-900 text-white rounded-2xl px-4 py-3 text-[11px] font-bold shadow-xl shadow-gray-300 whitespace-pre-wrap"></div>
 
     <script>
       const DEFAULT_BASE = 'https://discerning-peace-production-15a6.up.railway.app';
@@ -312,9 +194,9 @@
       function toast(msg) {
         const el = document.getElementById('toast');
         el.textContent = String(msg || '');
-        el.classList.add('show');
+        el.classList.remove('hidden');
         clearTimeout(toast._t);
-        toast._t = setTimeout(() => el.classList.remove('show'), 6000);
+        toast._t = setTimeout(() => el.classList.add('hidden'), 6000);
       }
 
       function normalizeHeader(h) {
@@ -383,7 +265,6 @@
 
         let idxMember = headers.indexOf('memberid');
         if (idxMember < 0) idxMember = headers.indexOf('idmember');
-        if (idxMember < 0) idxMember = headers.indexOf('idmember');
         if (idxMember < 0) idxMember = headers.indexOf('id');
 
         let idxName = headers.indexOf('name');
@@ -401,7 +282,6 @@
 
         let start = 1;
         if (idxMember < 0 || idxName < 0 || idxWa < 0) {
-          // fallback: first 3 columns
           idxMember = 0;
           idxName = 1;
           idxWa = 2;
@@ -428,35 +308,54 @@
           const sheet = wb.Sheets[wb.SheetNames[0]];
           return XLSX.utils.sheet_to_csv(sheet);
         }
-        // csv/tsv
         return await file.text();
-      }
-
-      function renderRows(items) {
-        const tbody = document.getElementById('rows');
-        if (!items.length) {
-          tbody.innerHTML = '<tr><td colspan="4" class="muted" style="padding: 14px;">Belum ada data.</td></tr>';
-          document.getElementById('btn_send_all').disabled = true;
-          document.getElementById('send_stat').textContent = '0 data';
-          return;
-        }
-        tbody.innerHTML = items
-          .slice(0, 500)
-          .map((r, idx) => {
-            return '<tr>' +
-              `<td>${idx + 1}</td>` +
-              `<td>${escapeHtml(r.memberId)}</td>` +
-              `<td>${escapeHtml(r.name)}</td>` +
-              `<td>${escapeHtml(r.whatsapp)}</td>` +
-              '</tr>';
-          })
-          .join('');
-        document.getElementById('btn_send_all').disabled = false;
-        document.getElementById('send_stat').textContent = `${items.length} data`; 
       }
 
       function escapeHtml(v) {
         return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      }
+
+      function renderRows(items) {
+        const tbody = document.getElementById('rows');
+        const sendBtn = document.getElementById('btn_send_all');
+        const stat = document.getElementById('send_stat');
+
+        if (!items.length) {
+          tbody.innerHTML = '<tr><td colspan="4" class="px-4 py-6 text-center text-[10px] font-black uppercase tracking-widest text-gray-300">Belum ada data</td></tr>';
+          sendBtn.disabled = true;
+          stat.textContent = '0 data';
+          return;
+        }
+
+        tbody.innerHTML = items
+          .slice(0, 500)
+          .map((r, idx) =>
+            '<tr class="border-t border-gray-50">' +
+              `<td class="px-4 py-3 text-[11px] font-bold text-gray-500">${idx + 1}</td>` +
+              `<td class="px-4 py-3 text-[11px] font-bold text-gray-900">${escapeHtml(r.memberId)}</td>` +
+              `<td class="px-4 py-3 text-[11px] font-bold text-gray-900">${escapeHtml(r.name)}</td>` +
+              `<td class="px-4 py-3 text-[11px] font-bold text-gray-700">${escapeHtml(r.whatsapp)}</td>` +
+            '</tr>'
+          )
+          .join('');
+
+        sendBtn.disabled = false;
+        stat.textContent = `${items.length} data`;
+      }
+
+      function getBase() {
+        const v = document.getElementById('base_url').value.trim();
+        return (v || DEFAULT_BASE).replace(/\/+$/, '');
+      }
+
+      function updateLinks() {
+        const base = getBase();
+        const a = document.getElementById('link_status');
+        const b = document.getElementById('link_health');
+        a.href = base + '/status';
+        a.textContent = '/status';
+        b.href = base + '/health';
+        b.textContent = '/health';
       }
 
       function setStatusUI(status, qr, detail) {
@@ -468,54 +367,43 @@
         const ph = document.getElementById('qr_placeholder');
 
         const s = String(status || 'offline').toLowerCase();
-        dot.classList.remove('online', 'qr');
-        badge.classList.remove('online', 'qr', 'offline');
+
+        dot.classList.remove('bg-red-500', 'bg-green-500', 'bg-amber-400');
+        badge.classList.remove('bg-red-50','text-red-600','border-red-100','bg-green-50','text-green-700','border-green-100','bg-amber-50','text-amber-700','border-amber-100');
 
         if (s === 'online') {
-          dot.classList.add('online');
+          dot.classList.add('bg-green-500');
           label.textContent = 'Online';
-          badge.classList.add('online');
+          badge.classList.add('bg-green-50','text-green-700','border','border-green-100');
           badge.textContent = 'ONLINE';
-          img.style.display = 'none';
-          ph.style.display = 'block';
-          ph.textContent = 'WhatsApp sudah terhubung.';
+          img.classList.add('hidden');
+          ph.classList.remove('hidden');
+          ph.textContent = 'WhatsApp sudah terhubung';
         } else if (s === 'qr') {
-          dot.classList.add('qr');
+          dot.classList.add('bg-amber-400');
           label.textContent = 'QR';
-          badge.classList.add('qr');
+          badge.classList.add('bg-amber-50','text-amber-700','border','border-amber-100');
           badge.textContent = 'SCAN QR';
           if (qr) {
             img.src = qr;
-            img.style.display = 'block';
-            ph.style.display = 'none';
+            img.classList.remove('hidden');
+            ph.classList.add('hidden');
           } else {
-            img.style.display = 'none';
-            ph.style.display = 'block';
+            img.classList.add('hidden');
+            ph.classList.remove('hidden');
             ph.textContent = 'Menunggu QR...';
           }
         } else {
+          dot.classList.add('bg-red-500');
           label.textContent = 'Offline';
-          badge.classList.add('offline');
+          badge.classList.add('bg-red-50','text-red-600','border','border-red-100');
           badge.textContent = 'OFFLINE';
-          img.style.display = 'none';
-          ph.style.display = 'block';
-          ph.textContent = 'Tidak terhubung. Pastikan API Railway online.';
+          img.classList.add('hidden');
+          ph.classList.remove('hidden');
+          ph.textContent = 'Tidak terhubung';
         }
 
         waDetail.textContent = detail || 'OK';
-      }
-
-      function getBase() {
-        const v = document.getElementById('base_url').value.trim();
-        return (v || DEFAULT_BASE).replace(/\/+$/, '');
-      }
-
-      function updateLinks() {
-        const base = getBase();
-        document.getElementById('link_status').href = base + '/status';
-        document.getElementById('link_status').textContent = base + '/status';
-        document.getElementById('link_health').href = base + '/health';
-        document.getElementById('link_health').textContent = base + '/health';
       }
 
       async function pollStatus() {
@@ -547,18 +435,21 @@
         } catch (e) {
           parsed = [];
           renderRows(parsed);
-          toast('Gagal parse file: ' + (e?.message || String(e)));
+          toast('Gagal parse: ' + (e?.message || String(e)));
         }
       }
 
       async function sendAll() {
         const base = getBase();
         const tmpl = document.getElementById('tmpl').value || '';
+        const stat = document.getElementById('send_stat');
+        const btn = document.getElementById('btn_send_all');
         if (!parsed.length) return;
 
-        document.getElementById('btn_send_all').disabled = true;
+        btn.disabled = true;
         let ok = 0;
         let fail = 0;
+
         for (let i = 0; i < parsed.length; i++) {
           const r = parsed[i];
           const phone = normalizeMsisdn(r.whatsapp);
@@ -579,19 +470,18 @@
           } catch (e) {
             fail++;
           }
-          document.getElementById('send_stat').textContent = `${ok} terkirim, ${fail} gagal, total ${parsed.length}`;
-          // small delay to avoid rate limits
+
+          stat.textContent = `${ok} terkirim, ${fail} gagal, total ${parsed.length}`;
           await new Promise((r2) => setTimeout(r2, 450));
         }
 
-        document.getElementById('btn_send_all').disabled = false;
+        btn.disabled = false;
         toast(`Selesai. Terkirim: ${ok}, gagal: ${fail}`);
       }
 
       function init() {
         const baseInput = document.getElementById('base_url');
         baseInput.value = localStorage.getItem('jago_whatsapp_base') || DEFAULT_BASE;
-        updateLinks();
 
         document.getElementById('btn_save_base').addEventListener('click', () => {
           const v = baseInput.value.trim() || DEFAULT_BASE;
@@ -600,11 +490,17 @@
           pollStatus();
         });
 
-        document.getElementById('btn_test').addEventListener('click', () => {
-          pollStatus().then(() => toast('OK: /status dipanggil'));
+        document.getElementById('btn_test').addEventListener('click', async () => {
+          await pollStatus();
+          toast('OK: /status dipanggil');
+        });
+
+        document.getElementById('btn_pick_file').addEventListener('click', () => {
+          document.getElementById('file').click();
         });
 
         document.getElementById('btn_parse').addEventListener('click', doParse);
+
         document.getElementById('btn_clear').addEventListener('click', () => {
           document.getElementById('file').value = '';
           document.getElementById('csv').value = '';
@@ -615,6 +511,7 @@
 
         document.getElementById('btn_send_all').addEventListener('click', sendAll);
 
+        updateLinks();
         pollStatus();
         setInterval(pollStatus, 5000);
       }
