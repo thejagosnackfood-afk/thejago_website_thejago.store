@@ -129,9 +129,9 @@ async function ensureWhatsAppWeb() {
                 try {
                     // Manually print QR to terminal with better scaling for Windows
                     const qrcode = require('qrcode');
-                    qrcode.toString(qr, { type: 'terminal', small: true, margin: 1 }, (err, str) => {
+                    qrcode.toString(qr, { type: 'utf8', small: true, margin: 0 }, (err, str) => {
                         if (!err) {
-                            console.log('\n[!] SCAN QR WA BERIKUT:');
+                            console.log('\n[!] SCAN QR (PASTIKAN TERMINAL LEBAR/ZOOM OUT):');
                             console.log(str);
                             console.log('-----------------------\n');
                         }
