@@ -127,10 +127,14 @@ async function ensureWhatsAppWeb() {
 
             if (qr) {
                 try {
-                    // Manually print QR to terminal since printQRInTerminal is deprecated
+                    // Manually print QR to terminal with better scaling for Windows
                     const qrcode = require('qrcode');
-                    qrcode.toString(qr, { type: 'terminal', small: true }, (err, str) => {
-                        if (!err) console.log('\n--- SCAN THIS QR ---\n' + str + '\n-------------------\n');
+                    qrcode.toString(qr, { type: 'terminal', small: true, margin: 1 }, (err, str) => {
+                        if (!err) {
+                            console.log('\n[!] SCAN QR WA BERIKUT:');
+                            console.log(str);
+                            console.log('-----------------------\n');
+                        }
                     });
 
                     waStatus.qr = await qrcode.toDataURL(qr);
