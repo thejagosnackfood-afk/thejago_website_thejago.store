@@ -115,7 +115,7 @@ async function ensureWhatsAppWeb() {
         const sock = baileys.default({
             version,
             auth: state,
-            printQRInTerminal: false,
+            printQRInTerminal: true,
             // Keep logs minimal on Railway
             logger: require('pino')({ level: process.env.WHATSAPP_LOG_LEVEL || 'silent' }),
         });
