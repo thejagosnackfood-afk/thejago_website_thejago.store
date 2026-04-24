@@ -1,0 +1,147 @@
+.reviewCard {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 12px;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+  transition: transform 140ms ease, box-shadow 140ms ease;
+}
+
+.reviewCard:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+}
+
+.reviewCard__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  min-width: 0;
+}
+
+.reviewCard__avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+
+.reviewCard__identity {
+  min-width: 0;
+  flex: 1;
+}
+
+.reviewCard__name {
+  font-size: 13px;
+  font-weight: 900;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewCard__location {
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reviewCard__date {
+  display: block;
+  margin-top: 2px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.reviewCard__source {
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 3px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.reviewCard__stars {
+  margin-top: 2px;
+  display: inline-flex;
+  gap: 1px;
+  line-height: 1;
+}
+
+.reviewCard__star {
+  font-size: 11px;
+}
+
+.reviewCard__star--filled {
+  color: #f59e0b;
+}
+
+.reviewCard__star--empty {
+  color: #d1d5db;
+}
+
+.reviewCard__text {
+  margin: 0;
+  color: rgba(17, 24, 39, 0.88);
+  font-size: 12px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 52px;
+}
+
+.reviewCard__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  min-height: 18px;
+}
+
+.reviewCard__verified {
+  font-size: 10px;
+  color: #047857;
+  border: 1px solid rgba(4, 120, 87, 0.24);
+  background: rgba(16, 185, 129, 0.12);
+  border-radius: 999px;
+  padding: 3px 7px;
+  font-weight: 800;
+}
+
+.reviewCard__helpful {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 700;
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+@media (max-width: 960px) {
+  .reviewCard {
+    padding: 9px;
+  }
+
+  .reviewCard__avatar {
+    width: 36px;
+    height: 36px;
+  }
+
+  .reviewCard__text {
+    font-size: 12px;
+  }
+}

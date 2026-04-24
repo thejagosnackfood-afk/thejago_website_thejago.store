@@ -1,12 +1,5 @@
 node_modules
-.next
 .git
-.firebase
+.DS_Store
+npm-debug.log
 *.log
-.env
-.env.*
-deploy-clean
-calculator-logic-export
-thejago-live
-.codex
-

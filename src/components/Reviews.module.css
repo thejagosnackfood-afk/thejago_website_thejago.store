@@ -1,0 +1,314 @@
+/* Reviews Component - Mobile First Approach */
+
+.reviews {
+  margin-top: 14px;
+  container-type: inline-size;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+  padding: 12px;
+  overflow: hidden;
+}
+
+.header {
+  padding: 2px 2px 10px;
+}
+
+.title {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-size: 18px;
+  margin: 0 0 6px 0;
+}
+
+.sub {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.badges {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+/* Mobile Layout */
+.mobile {
+  display: block;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  border: none;
+  background: transparent;
+  padding: 8px 12px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 8px 8px 0 0;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  position: relative;
+}
+
+.tab:hover {
+  color: var(--ink);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.activeTab {
+  color: var(--brand);
+  font-weight: 800;
+}
+
+.activeTab::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--brand);
+  border-radius: 2px;
+}
+
+.content {
+  min-height: 200px;
+}
+
+/* Desktop Grid Layout */
+.grid {
+  display: none;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  align-items: start;
+}
+
+.col {
+  border-radius: var(--radius);
+  padding: 10px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(10px);
+  min-width: 0;
+}
+
+.label {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
+/* Review List */
+.list {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 8px;
+  min-width: 0;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--muted);
+  font-size: 14px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: var(--radius2);
+  border: 1px dashed var(--line);
+}
+
+/* Review Card */
+.card {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 10px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  width: 100%;
+  min-width: 0;
+}
+
+.card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  border-color: rgba(15, 157, 88, 0.2);
+}
+
+.cardHeader {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+  min-width: 0;
+}
+
+.avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  background: rgba(0, 0, 0, 0.06);
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.cardMeta {
+  min-width: 0;
+}
+
+.author {
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  font-size: 13px;
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.source {
+  margin-left: auto;
+  font-size: 9px;
+  font-weight: 800;
+  color: var(--muted);
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px 6px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.text {
+  margin: 0;
+  color: rgba(0, 0, 0, 0.75);
+  font-size: 12px;
+  line-height: 1.45;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 52px;
+}
+
+/* Stars Component */
+.stars {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  color: #fbbf24;
+}
+
+.dim {
+  color: rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive Breakpoints */
+@container (min-width: 640px) {
+  .title {
+    font-size: 20px;
+  }
+}
+
+/* Tablet and Desktop */
+@media (min-width: 768px) {
+  .mobile {
+    display: none;
+  }
+  
+  .grid {
+    display: grid;
+  }
+  
+  .reviews {
+    margin-top: 16px;
+    padding: 14px;
+  }
+  
+  .header {
+    padding: 0 4px 12px;
+  }
+  
+  .title {
+    font-size: 22px;
+  }
+  
+  .sub {
+    font-size: 13px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .title {
+    font-size: 24px;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .card {
+    background: rgba(255, 255, 255, 0.9);
+  }
+  
+  .empty {
+    background: rgba(255, 255, 255, 0.1);
+  }
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+  
+  .tab {
+    transition: none;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .card:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .tab:hover {
+    background: transparent;
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1120px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1121px) and (max-width: 1460px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}

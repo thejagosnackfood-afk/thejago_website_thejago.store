@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" role="img" aria-label="Lazada">
+  <defs>
+    <linearGradient id="lazadaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f146d" />
+      <stop offset="100%" stop-color="#9a1dff" />
+    </linearGradient>
+  </defs>
+  <rect x="1.5" y="1.5" width="21" height="21" rx="6" fill="url(#lazadaGradient)" />
+  <path
+    d="M7.5 7.2h4.4v9.4h4.6V19H7.5V7.2Zm6.2 0h2.8v9.4h-2.8V7.2Z"
+    fill="#ffffff"
+  />
+</svg>

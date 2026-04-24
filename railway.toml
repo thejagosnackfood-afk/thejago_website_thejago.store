@@ -1,8 +1,8 @@
 [build]
-  builder = "nixpacks"
-  buildCommand = "echo 'Skipping Next.js build...'"
+builder = "nixpacks"
+buildCommand = "npm ci && npm run build"
 
 [deploy]
-  startCommand = "node server.js"
-  healthcheckPath = "/health"
-  healthcheckTimeout = 100
+startCommand = "node src/index.js"
+healthcheckPath = "/health"
+healthcheckTimeout = 100
